@@ -1,1 +1,13 @@
-[![Review Assignment Due Date](https://classroom.github.com/assets/deadline-readme-button-24ddc0f5d75046c5622901739e7c5dd533143b0c8e959d652212380cedb1ea36.svg)](https://classroom.github.com/a/ecFNqaXc)
+# Week 21 RevoU Assignment
+***
+<img align='center' width='900' src='https://github.com/hlmyrsyd/thereadmestuff/blob/main/100%25.svg' />
+
+## Hello!
+This is an backand of a Tweet app using Flask as a Pyhton Framework 
+ 
+## Deployment
+postman deployed link for this app be is here https://documenter.getpostman.com/view/28996075/2s9YeD8DHj
+
+## THANKYOU
+Thankyou for visiting
+
