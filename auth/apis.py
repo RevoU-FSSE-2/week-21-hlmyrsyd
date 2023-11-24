@@ -4,23 +4,31 @@ from user.models import User
 from db import db
 from common.bcrypt import bcrypt
 from datetime import datetime, timedelta
+from marshmallow import Schema, fields, ValidationError
 
 auth_blueprint = Blueprint('auth', __name__)
+
+class UserRegisterSchema(Schema):
+    username = fields.String(required=True)
+    password = fields.String(required=True)
+    email = fields.String(required=True)
+    bio = fields.String(required=True)
 
 @auth_blueprint.route('/register', methods=['POST'])
 def register():
     data = request.get_json()
 
-    username = data["username"]
-    password = data["password"]
-    email = data["email"]
-    bio = data["bio"]
+    schema = UserRegisterSchema()
+    try:
+        data = schema.load(data)
+    except ValidationError as err:
+        return {"error": err.messages}, 400
 
-    hashed_password = bcrypt.generate_password_hash(password).decode('utf-8')
-    new_user = User(username=username, password=hashed_password, email=email, bio=bio)
+    hashed_password = bcrypt.generate_password_hash(data['password']).decode('utf-8')
+    new_user = User(username=data['username'], password=hashed_password, email=data['email'], bio=data['bio'])
 
-    existing_user_username = User.query.filter_by(username=username).first()
-    existing_user_email = User.query.filter_by(email=email).first()
+    existing_user_username = User.query.filter_by(username=data['username']).first()
+    existing_user_email = User.query.filter_by(email=data['email']).first()
 
     if existing_user_username:
         return jsonify({'error': 'Username already registered.'}), 400
@@ -33,8 +41,8 @@ def register():
 
     return {
         'id': new_user.id,
-        'username': username,
-        'bio': bio
+        'username': data['username'],
+        'bio': data['bio']
     }
 
 @auth_blueprint.route('/login', methods=['POST'])
