@@ -1,7 +1,9 @@
+import jwt, os
 from flask import Blueprint, request, jsonify
 from user.models import User
 from db import db
 from common.bcrypt import bcrypt
+from datetime import datetime, timedelta
 
 auth_blueprint = Blueprint('auth', __name__)
 
@@ -38,12 +40,30 @@ def register():
 @auth_blueprint.route('/login', methods=['POST'])
 def login():
     data = request.get_json()
+
     username = data["username"]
     password = data["password"]
 
     user = User.query.filter_by(username=username).first()
 
-    if user and bcrypt.check_password_hash(user.password, password):
-        return jsonify({'message': f'Welcome back, {username}!'})
-    else:
-        return jsonify({'error': 'It seems like you username or password is incorrect'}), 401
+    if not user:
+        return {"error": "Username or Password isn't Correct"}, 400
+    
+    valid_password = bcrypt.check_password_hash(user.password, password)
+    if not valid_password:
+        return {"error": "Username or Password isn't Correct"}, 400
+
+    payload = {
+        'user_id': user.id,
+        'username': user.username,
+        'email': user.email,
+        'exp': datetime.utcnow() + timedelta(minutes=1)
+    }
+    token = jwt.encode(payload, os.getenv('SECRET_KEY'), algorithm="HS256")
+
+    return {
+        'message': f'Welcome back, {username}!',
+        'id': user.id,
+        'username': user.username,
+        'token': token
+    }
